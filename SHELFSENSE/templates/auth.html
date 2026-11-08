@@ -1,0 +1,97 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ShelfSense | Account</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="auth-body">
+
+<div class="auth-shell">
+
+    <div class="auth-brand">
+        <div class="brand-mark">S</div>
+        <div>
+            <strong>ShelfSense</strong>
+            <small>SMARTER INVENTORY</small>
+        </div>
+    </div>
+
+    <div class="auth-card">
+
+        <p class="eyebrow">YOUR STORE, IN CONTROL</p>
+
+        {% if mode == "register" %}
+            <h1>Create your store account</h1>
+            <p class="muted">Set up your private inventory workspace.</p>
+        {% else %}
+            <h1>Welcome back</h1>
+            <p class="muted">Sign in to manage your store.</p>
+        {% endif %}
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% for category, message in messages %}
+                <div class="flash {{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endwith %}
+
+        <form method="POST" class="auth-form">
+
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+            {% if mode == "register" %}
+
+                <label>
+                    Your name
+                    <input name="name" required placeholder="Store owner">
+                </label>
+
+                <label>
+                    Store name
+                    <input name="store_name" required placeholder="GreenMart">
+                </label>
+
+            {% endif %}
+
+            <label>
+                Email address
+                <input type="email" name="email" required placeholder="you@example.com">
+            </label>
+
+            <label>
+                Password
+                <input type="password" name="password" required minlength="{% if mode == 'register' %}8{% else %}1{% endif %}">
+            </label>
+
+            <button class="btn primary full" type="submit">
+                {% if mode == "register" %}
+                    Create store account
+                {% else %}
+                    Sign in
+                {% endif %}
+            </button>
+
+        </form>
+
+        <div class="auth-switch">
+            {% if mode == "register" %}
+                Already registered?
+                <a href="{{ url_for('login') }}">Sign in</a>
+            {% else %}
+                New to ShelfSense?
+                <a href="{{ url_for('register') }}">Create an account</a>
+            {% endif %}
+        </div>
+
+    </div>
+
+    <p class="auth-foot">
+        Every store has its own private inventory.
+    </p>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,82 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sales History | ShelfSense</title>
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="layout">
+
+<aside class="sidebar">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+        <span class="brand-mark">S</span>
+        <span><strong>ShelfSense</strong><small>STORE WORKSPACE</small></span>
+    </a>
+
+    <a class="side-link" href="{{ url_for('dashboard') }}">▦ Overview</a>
+    <a class="side-link active" href="{{ url_for('sales') }}">↗ Sales history</a>
+</aside>
+
+<main class="main">
+
+<header class="topbar">
+    <div>
+        <p class="crumb">Workspace / Sales</p>
+        <h1>Sales history</h1>
+        <p class="muted">Recorded transactions for {{ session.get('store_name') }}.</p>
+    </div>
+
+    <a class="btn secondary" href="{{ url_for('dashboard') }}">Back to dashboard</a>
+</header>
+
+<section class="panel">
+
+<div class="table-wrap">
+
+<table>
+
+<thead>
+<tr>
+    <th>PRODUCT</th>
+    <th>QUANTITY</th>
+    <th>DISCOUNT</th>
+    <th>REVENUE</th>
+    <th>DATE</th>
+</tr>
+</thead>
+
+<tbody>
+
+{% for sale in sales %}
+
+<tr>
+    <td><b>{{ sale.product_name }}</b></td>
+    <td>{{ sale.quantity }}</td>
+    <td>{{ "%.0f"|format(sale.discount_percent) }}%</td>
+    <td>₹{{ "%.2f"|format(sale.revenue) }}</td>
+    <td>{{ sale.sold_on }}</td>
+</tr>
+
+{% else %}
+
+<tr>
+    <td colspan="5" class="empty-cell">No sales recorded yet.</td>
+</tr>
+
+{% endfor %}
+
+</tbody>
+</table>
+
+</div>
+</section>
+
+</main>
+</div>
+
+</body>
+</html>
