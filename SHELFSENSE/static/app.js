@@ -220,3 +220,96 @@ if (startButton) {
 if (stopButton) {
     stopButton.addEventListener("click", stopShelfScanner);
 }
+// ADD PRODUCT: BARCODE SCANNER
+
+const productBarcodeButton = document.getElementById(
+    "startProductBarcodeScanner"
+);
+
+const stopProductBarcodeButton = document.getElementById(
+    "stopProductBarcodeScanner"
+);
+
+const productBarcodeInput = document.getElementById("barcode");
+
+const productBarcodeMessage = document.getElementById(
+    "productBarcodeMessage"
+);
+
+let productBarcodeScanner = null;
+let productBarcodeScannerRunning = false;
+
+
+// Start camera
+if (productBarcodeButton) {
+    productBarcodeButton.addEventListener("click", async function () {
+
+        if (typeof Html5Qrcode === "undefined") {
+            productBarcodeMessage.textContent =
+                "Scanner library could not load. Please refresh the page.";
+            return;
+        }
+
+        try {
+            productBarcodeScanner = new Html5Qrcode(
+                "product-barcode-reader"
+            );
+
+            await productBarcodeScanner.start(
+                { facingMode: "environment" },
+                {
+                    fps: 10,
+                    qrbox: { width: 280, height: 120 }
+                },
+
+                async function (decodedText) {
+
+                    productBarcodeInput.value = decodedText;
+
+                    productBarcodeMessage.textContent =
+                        "Barcode detected: " + decodedText;
+
+                    await stopProductBarcodeCamera();
+                }
+            );
+
+            productBarcodeScannerRunning = true;
+
+            productBarcodeButton.style.display = "none";
+            stopProductBarcodeButton.style.display = "inline-block";
+
+            productBarcodeMessage.textContent =
+                "Camera active. Point it at the product barcode.";
+
+        } catch (error) {
+            productBarcodeMessage.textContent =
+                "Could not open camera. Check camera permission.";
+        }
+    });
+}
+
+
+// Stop camera
+async function stopProductBarcodeCamera() {
+
+    if (
+        productBarcodeScanner &&
+        productBarcodeScannerRunning
+    ) {
+        await productBarcodeScanner.stop();
+        await productBarcodeScanner.clear();
+
+        productBarcodeScannerRunning = false;
+    }
+
+    productBarcodeButton.style.display = "inline-block";
+    stopProductBarcodeButton.style.display = "none";
+}
+
+
+if (stopProductBarcodeButton) {
+    stopProductBarcodeButton.addEventListener(
+        "click",
+        stopProductBarcodeCamera
+    );
+}
