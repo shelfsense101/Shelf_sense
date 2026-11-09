@@ -772,3 +772,43 @@ tr:last-child td {
         padding: 23px;
     }
 }
+/* ADD PRODUCT BARCODE SCANNER */
+
+#product-barcode-reader {
+    width: 100%;
+    max-width: 400px;
+    margin: 12px 0;
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+#product-barcode-reader video {
+    border-radius: 12px;
+}
+
+#startProductBarcodeScanner,
+#stopProductBarcodeScanner {
+    padding: 10px 16px;
+    margin-top: 10px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+#startProductBarcodeScanner {
+    background: #10b981;
+    color: #071b18;
+}
+
+#stopProductBarcodeScanner {
+    background: #334155;
+    color: white;
+}
+
+#productBarcodeMessage {
+    display: block;
+    margin-top: 8px;
+    color: #94a3b8;
+    font-size: 12px;
+}
