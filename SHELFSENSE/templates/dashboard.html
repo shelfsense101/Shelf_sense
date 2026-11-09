@@ -56,6 +56,34 @@
         <div>
             <p class="crumb">Workspace / Overview</p>
             <h1>Welcome, {{ session.get('user_name') }}.</h1>
+            <!-- BARCODE SCANNER -->
+<section class="scanner-card">
+    <div class="scanner-heading">
+        <div>
+            <h2>Quick Scan</h2>
+            <p>Scan a product barcode to automatically update inventory.</p>
+        </div>
+        <span class="scanner-status">READY</span>
+    </div>
+
+    <div id="scanner-reader"></div>
+
+    <div class="scanner-actions">
+        <button type="button" id="startScanner">
+            Start Camera Scanner
+        </button>
+
+        <button type="button" id="stopScanner">
+            Stop Scanner
+        </button>
+    </div>
+
+    <div id="scanMessage" role="status">
+        Camera scanner is ready.
+    </div>
+</section>
+
+<script src="https://unpkg.com/html5-qrcode"></script>
             <p class="muted">Here's what's happening at {{ store_name }}.</p>
         </div>
 
@@ -385,6 +413,28 @@
 
                 <label>Quantity *
                     <input type="number" name="quantity" min="1" required>
+                    <div class="form-group">
+    <label for="barcode">Product Barcode</label>
+    <input
+        type="text"
+        id="barcode"
+        name="barcode"
+        placeholder="Scan or enter barcode number"
+    >
+</div>
+
+<div class="form-group">
+    <label for="low_stock_threshold">Minimum Stock Alert</label>
+    <input
+        type="number"
+        id="low_stock_threshold"
+        name="low_stock_threshold"
+        value="5"
+        min="0"
+        required
+    >
+    <small>Alert when stock reaches this quantity.</small>
+</div>
                 </label>
 
                 <label>Purchase cost per unit (₹) *
