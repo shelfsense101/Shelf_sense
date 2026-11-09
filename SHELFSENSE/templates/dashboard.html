@@ -415,13 +415,33 @@
                 <label>Quantity *
                     <input type="number" name="quantity" min="1" required>
                     <div class="form-group">
+  <div class="form-group">
     <label for="barcode">Product Barcode</label>
+
     <input
         type="text"
         id="barcode"
         name="barcode"
         placeholder="Scan or enter barcode number"
     >
+
+    <button type="button" id="startProductBarcodeScanner">
+        Scan Barcode
+    </button>
+
+    <button
+        type="button"
+        id="stopProductBarcodeScanner"
+        style="display: none;"
+    >
+        Stop Camera
+    </button>
+
+    <div id="product-barcode-reader"></div>
+
+    <small id="productBarcodeMessage">
+        Scan a product barcode to fill this field automatically.
+    </small>
 </div>
 
 <div class="form-group">
