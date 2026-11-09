@@ -131,13 +131,16 @@ def prepare_csrf():
         session["csrf_token"] = secrets.token_urlsafe(32)
 
     if request.method == "POST":
-        supplied = request.form.get("csrf_token", "")
-        expected = session.get("csrf_token", "")
+    supplied = (
+        request.headers.get("X-CSRF-Token")
+        or request.form.get("csrf_token", "")
+    )
+    expected = session.get("csrf_token", "")
 
-        if not supplied or not secrets.compare_digest(
-            supplied, expected
-        ):
-            return "Security check failed. Refresh and try again.", 400
+    if not supplied or not secrets.compare_digest(
+        supplied, expected
+    ):
+        return "Security check failed. Refresh and try again.", 400
 
 
 @app.context_processor
@@ -374,7 +377,7 @@ def dashboard():
         products=products,
         metrics=metrics,
         today=date.today().isoformat(),
-        store_name=session.get("store_name")
+        store_name=session.get("store_name"),
         low_stock=low_stock
     )
 
@@ -449,10 +452,10 @@ def add_product():
 @app.route("/api/scan", methods=["POST"])
 @login_required
 def scan_barcode():
-
     db = get_db()
-    barcode = request.form.get("barcode", "").strip()
-
+    data = request.get_json(silent=True) or {}
+    barcode = str(data.get("barcode", "")).strip()
+    
     if not barcode:
         return jsonify({
             "success": False,
