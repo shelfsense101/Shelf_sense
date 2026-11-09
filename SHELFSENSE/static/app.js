@@ -97,3 +97,126 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
 });
+// ======================================
+// SHELFSENSE BARCODE SCANNER
+// ======================================
+
+let shelfScanner = null;
+let scannerRunning = false;
+let scanLocked = false;
+
+const startButton = document.getElementById("startScanner");
+const stopButton = document.getElementById("stopScanner");
+const scanMessage = document.getElementById("scanMessage");
+
+function showScanMessage(message, type = "normal") {
+    if (!scanMessage) return;
+
+    scanMessage.textContent = message;
+    scanMessage.dataset.type = type;
+}
+
+async function processBarcode(barcode) {
+    if (scanLocked) return;
+
+    scanLocked = true;
+    showScanMessage("Processing barcode: " + barcode, "normal");
+
+    try {
+        const csrfToken = document.querySelector(
+            'meta[name="csrf-token"]'
+        )?.content;
+
+        const response = await fetch("/api/scan", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                ...(csrfToken ? { "X-CSRF-Token": csrfToken } : {})
+            },
+            body: JSON.stringify({ barcode: barcode })
+        });
+
+        const result = await response.json();
+
+        if (!response.ok || !result.success) {
+            showScanMessage(result.message || "Scan failed.", "error");
+            return;
+        }
+
+        if (result.low_stock) {
+            showScanMessage(
+                "RESTOCK ALERT: " + result.product +
+                " — only " + result.quantity + " left!",
+                "warning"
+            );
+        } else {
+            showScanMessage(
+                result.product + " scanned. Remaining stock: " +
+                result.quantity,
+                "success"
+            );
+        }
+
+    } catch (error) {
+        showScanMessage("Could not contact the server. Try again.", "error");
+    } finally {
+        setTimeout(() => {
+            scanLocked = false;
+        }, 1800);
+    }
+}
+
+async function startShelfScanner() {
+    if (scannerRunning) return;
+
+    if (!window.Html5Qrcode) {
+        showScanMessage("Scanner library did not load. Refresh the page.", "error");
+        return;
+    }
+
+    try {
+        shelfScanner = new Html5Qrcode("scanner-reader");
+
+        await shelfScanner.start(
+            { facingMode: "environment" },
+            {
+                fps: 10,
+                qrbox: { width: 250, height: 150 }
+            },
+            (decodedText) => {
+                processBarcode(decodedText);
+            },
+            () => {}
+        );
+
+        scannerRunning = true;
+        showScanMessage("Camera active. Point it at a product barcode.");
+
+    } catch (error) {
+        showScanMessage(
+            "Could not start camera. Check camera permissions and HTTPS.",
+            "error"
+        );
+    }
+}
+
+async function stopShelfScanner() {
+    if (!shelfScanner || !scannerRunning) return;
+
+    try {
+        await shelfScanner.stop();
+        shelfScanner.clear();
+        scannerRunning = false;
+        showScanMessage("Scanner stopped.");
+    } catch (error) {
+        showScanMessage("Unable to stop scanner.", "error");
+    }
+}
+
+if (startButton) {
+    startButton.addEventListener("click", startShelfScanner);
+}
+
+if (stopButton) {
+    stopButton.addEventListener("click", stopShelfScanner);
+}
