@@ -8,7 +8,7 @@ from functools import wraps
 
 from flask import (
     Flask, render_template, request, redirect,
-    url_for, flash, session, g
+    url_for, flash, session, g, jsonify
 )
 from werkzeug.security import generate_password_hash, check_password_hash
 
@@ -71,6 +71,8 @@ def init_db():
         cost_price REAL NOT NULL DEFAULT 0,
         selling_price REAL NOT NULL DEFAULT 0,
         notes TEXT,
+        barcode TEXT,
+        low_stock_threshold INTEGER NOT NULL DEFAULT 5,
         FOREIGN KEY(store_id) REFERENCES stores(id)
     );
 
@@ -94,6 +96,27 @@ def init_db():
 
     CREATE INDEX IF NOT EXISTS idx_sales_store
     ON sales(store_id);
+    """)
+        # Add new columns to existing databases
+    columns = {
+        row[1] for row in
+        db.execute("PRAGMA table_info(store_products)").fetchall()
+    }
+
+    if "barcode" not in columns:
+        db.execute("ALTER TABLE store_products ADD COLUMN barcode TEXT")
+
+    if "low_stock_threshold" not in columns:
+        db.execute("""
+            ALTER TABLE store_products
+            ADD COLUMN low_stock_threshold INTEGER NOT NULL DEFAULT 5
+        """)
+
+    # A barcode must be unique within each shop
+    db.execute("""
+        CREATE UNIQUE INDEX IF NOT EXISTS idx_store_barcode_unique
+        ON store_products(store_id, barcode)
+        WHERE barcode IS NOT NULL AND barcode != ''
     """)
 
     db.commit()
@@ -293,7 +316,11 @@ def dashboard():
         p["suggested_discount"] = discount
 
         products.append(p)
-
+    
+    low_stock = [
+        p for p in products
+        if p["quantity"] <= p["low_stock_threshold"]
+    ]
     stats = db.execute("""
         SELECT COUNT(*) AS product_count,
                COALESCE(SUM(quantity), 0) AS units,
@@ -348,6 +375,7 @@ def dashboard():
         metrics=metrics,
         today=date.today().isoformat(),
         store_name=session.get("store_name")
+        low_stock=low_stock
     )
 
 
@@ -361,41 +389,126 @@ def add_product():
         name = request.form["name"].strip()
         brand = request.form.get("brand", "").strip()
         category = request.form.get("category", "Other")
+        barcode = request.form.get("barcode", "").strip()
+
         quantity = int(request.form["quantity"])
+        threshold = int(request.form.get("low_stock_threshold", 5))
+
         stocked = request.form["stocked_on"]
         expiry = request.form["expiry_date"]
+
         cost = float(request.form["cost_price"])
         selling = float(request.form["selling_price"])
 
         date.fromisoformat(stocked)
         date.fromisoformat(expiry)
 
-        if not name or quantity < 1 or expiry < stocked:
-            raise ValueError
-
-        if cost < 0 or selling < 0:
+        if (
+            not name
+            or quantity < 1
+            or threshold < 0
+            or expiry < stocked
+            or cost < 0
+            or selling < 0
+        ):
             raise ValueError
 
     except (ValueError, KeyError):
         flash("Please check the product information.", "error")
         return redirect(url_for("dashboard"))
 
-    get_db().execute("""
-        INSERT INTO store_products
-        (store_id, name, brand, category, quantity,
-         stocked_on, expiry_date, cost_price, selling_price, notes)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    """, (
-        store_id(), name, brand, category, quantity,
-        stocked, expiry, cost, selling,
-        request.form.get("notes", "")
-    ))
+    db = get_db()
 
-    get_db().commit()
+    try:
+        db.execute("""
+            INSERT INTO store_products
+            (store_id, name, brand, category, quantity,
+             stocked_on, expiry_date, cost_price, selling_price,
+             notes, barcode, low_stock_threshold)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            store_id(), name, brand, category, quantity,
+            stocked, expiry, cost, selling,
+            request.form.get("notes", ""),
+            barcode, threshold
+        ))
+
+        db.commit()
+
+    except sqlite3.IntegrityError:
+        db.rollback()
+        flash("This barcode is already registered in your shop.", "error")
+        return redirect(url_for("dashboard"))
 
     flash(f"{name} added successfully.", "success")
     return redirect(url_for("dashboard"))
 
+
+# BARCODE SCANNER
+
+@app.route("/api/scan", methods=["POST"])
+@login_required
+def scan_barcode():
+
+    db = get_db()
+    barcode = request.form.get("barcode", "").strip()
+
+    if not barcode:
+        return jsonify({
+            "success": False,
+            "message": "No barcode was received."
+        }), 400
+
+    product = db.execute("""
+        SELECT * FROM store_products
+        WHERE barcode = ? AND store_id = ?
+    """, (barcode, store_id())).fetchone()
+
+    if not product:
+        return jsonify({
+            "success": False,
+            "message": "Product not found. Add this barcode to your inventory first."
+        }), 404
+
+    if product["quantity"] <= 0:
+        return jsonify({
+            "success": False,
+            "message": f"{product['name']} is out of stock!"
+        }), 409
+
+    # Subtract exactly one unit
+    cursor = db.execute("""
+        UPDATE store_products
+        SET quantity = quantity - 1
+        WHERE id = ? AND store_id = ? AND quantity > 0
+    """, (product["id"], store_id()))
+
+    if cursor.rowcount != 1:
+        db.rollback()
+        return jsonify({
+            "success": False,
+            "message": "Stock could not be updated. Please scan again."
+        }), 409
+
+    db.commit()
+
+    updated = db.execute("""
+        SELECT quantity, low_stock_threshold, name
+        FROM store_products
+        WHERE id = ? AND store_id = ?
+    """, (product["id"], store_id())).fetchone()
+
+    quantity = updated["quantity"]
+    threshold = updated["low_stock_threshold"]
+
+    return jsonify({
+        "success": True,
+        "message": f"{updated['name']} scanned successfully.",
+        "product": updated["name"],
+        "quantity": quantity,
+        "low_stock": quantity <= threshold,
+        "threshold": threshold
+    })
 
 # DELETE PRODUCT
 
