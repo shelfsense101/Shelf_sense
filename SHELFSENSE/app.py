@@ -124,23 +124,22 @@ def init_db():
 
 
 # SECURITY
-
 @app.before_request
 def prepare_csrf():
     if "csrf_token" not in session:
         session["csrf_token"] = secrets.token_urlsafe(32)
 
     if request.method == "POST":
-    supplied = (
-        request.headers.get("X-CSRF-Token")
-        or request.form.get("csrf_token", "")
-    )
-    expected = session.get("csrf_token", "")
+        supplied = (
+            request.headers.get("X-CSRF-Token")
+            or request.form.get("csrf_token", "")
+        )
+        expected = session.get("csrf_token", "")
 
-    if not supplied or not secrets.compare_digest(
-        supplied, expected
-    ):
-        return "Security check failed. Refresh and try again.", 400
+        if not supplied or not secrets.compare_digest(
+            supplied, expected
+        ):
+            return "Security check failed. Refresh and try again.", 400
 
 
 @app.context_processor
