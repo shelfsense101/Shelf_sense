@@ -255,7 +255,7 @@ def register():
         flash("Account created successfully. Please log in.", "success")
         return redirect(url_for("login"))
 
-   rrn render_template("auth.html", mode="register")etu
+        return render_template("auth.html", mode="register")
 
 
 @app.route("/login", methods=["GET", "POST"])
