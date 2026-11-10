@@ -55,6 +55,7 @@ def close_db(error=None):
         db.close()
 
   
+
 def init_db():
     db = sqlite3.connect(DB_PATH)
     db.execute("PRAGMA foreign_keys = ON")
@@ -113,40 +114,19 @@ def init_db():
     ON sales(store_id);
     """)
 
+    # Check existing product columns
     columns = {
         row[1] for row in
         db.execute("PRAGMA table_info(store_products)").fetchall()
     }
 
+    # Add barcode column if missing
     if "barcode" not in columns:
         db.execute(
             "ALTER TABLE store_products ADD COLUMN barcode TEXT"
         )
 
-    if "low_stock_threshold" not in columns:
-        db.execute("""
-            ALTER TABLE store_products
-            ADD COLUMN low_stock_threshold INTEGER NOT NULL DEFAULT 5
-        """)
-
-    db.execute("""
-        CREATE UNIQUE INDEX IF NOT EXISTS idx_store_barcode_unique
-        ON store_products(store_id, barcode)
-        WHERE barcode IS NOT NULL AND barcode != ''
-    """)
-
-    db.commit()
-    db.close()
-
-        # Add new columns to existing databases
-    columns = {
-        row[1] for row in
-        db.execute("PRAGMA table_info(store_products)").fetchall()
-    }
-
-    if "barcode" not in columns:
-        db.execute("ALTER TABLE store_products ADD COLUMN barcode TEXT")
-
+    # Add low stock threshold if missing
     if "low_stock_threshold" not in columns:
         db.execute("""
             ALTER TABLE store_products
