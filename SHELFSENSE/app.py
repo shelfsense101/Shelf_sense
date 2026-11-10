@@ -1,4 +1,4 @@
-
+import re
 import os
 import sqlite3
 import secrets
@@ -11,6 +11,21 @@ from flask import (
     url_for, flash, session, g, jsonify
 )
 from werkzeug.security import generate_password_hash, check_password_hash
+def normalize_identifier(identifier):
+    identifier = identifier.strip()
+
+    if "@" in identifier:
+        return identifier.lower()
+
+    digits = re.sub(r"\D", "", identifier)
+
+    if len(digits) == 12 and digits.startswith("91"):
+        digits = digits[2:]
+
+    if len(digits) != 10:
+        return None
+
+    return "+91" + digits
 
 BASE_DIR = Path(__file__).resolve().parent
 DB_PATH = BASE_DIR / "shelfsense_v2.db"
@@ -213,16 +228,16 @@ def home():
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
-
     if request.method == "POST":
-
         name = request.form.get("name", "").strip()
-        store = request.form.get("store_name", "").strip()
-        email = request.form.get("email", "").strip().lower()
+        store_name = request.form.get("store_name", "").strip()
+        identifier = request.form.get("identifier") or request.form.get("email", "")
         password = request.form.get("password", "")
 
-        if not all([name, store, email, password]):
-            flash("Please complete all fields.", "error")
+        identifier = normalize_identifier(identifier)
+
+        if not name or not store_name or not identifier or not password:
+            flash("Please fill in all fields.", "error")
             return redirect(url_for("register"))
 
         if len(password) < 8:
@@ -231,79 +246,67 @@ def register():
 
         db = get_db()
 
-        try:
-            cursor = db.execute(
-                "INSERT INTO stores (name) VALUES (?)",
-                (store,)
-            )
+        existing = db.execute(
+            "SELECT id FROM users WHERE email = ?", (identifier,)
+        ).fetchone()
 
-            new_store_id = cursor.lastrowid
+        if existing:
+            flash("This email or phone number is already registered.", "error")
+            return redirect(url_for("register"))
 
-            cursor = db.execute("""
-                INSERT INTO users
-                (store_id, name, email, password_hash)
-                VALUES (?, ?, ?, ?)
-            """, (
-                new_store_id,
-                name,
-                email,
-                generate_password_hash(password)
-            ))
+        password_hash = generate_password_hash(password)
 
-            db.commit()
+        cursor = db.execute(
+            "INSERT INTO stores (name) VALUES (?)",
+            (store_name,)
+        )
+        new_store_id = cursor.lastrowid
 
-            session.clear()
-            session["user_id"] = cursor.lastrowid
-            session["store_id"] = new_store_id
-            session["user_name"] = name
-            session["store_name"] = store
-            session["csrf_token"] = secrets.token_urlsafe(32)
+        db.execute(
+            """
+            INSERT INTO users (store_id, name, email, password_hash)
+            VALUES (?, ?, ?, ?)
+            """,
+            (new_store_id, name, identifier, password_hash)
+        )
 
-            return redirect(url_for("dashboard"))
+        db.commit()
 
-        except sqlite3.IntegrityError:
-            db.rollback()
-            flash("This email already has an account.", "error")
-            return redirect(url_for("login"))
+        flash("Account created successfully. Please log in.", "success")
+        return redirect(url_for("login"))
 
-    return render_template("auth.html", mode="register")
+    return render_template("auth.html")
 
-
-# LOGIN
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
-
     if request.method == "POST":
-
-        email = request.form.get("email", "").strip().lower()
+        identifier = request.form.get("identifier") or request.form.get("email", "")
         password = request.form.get("password", "")
 
-        user = get_db().execute("""
-            SELECT users.*, stores.name AS store_name
-            FROM users
-            JOIN stores ON stores.id = users.store_id
-            WHERE users.email = ?
-        """, (email,)).fetchone()
+        identifier = normalize_identifier(identifier)
 
-        if user and check_password_hash(
-            user["password_hash"], password
-        ):
+        if not identifier or not password:
+            flash("Enter a valid email or phone number and password.", "error")
+            return redirect(url_for("login"))
 
-            session.clear()
+        db = get_db()
+
+        user = db.execute(
+            "SELECT * FROM users WHERE email = ?",
+            (identifier,)
+        ).fetchone()
+
+        if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
             session["store_id"] = user["store_id"]
-            session["user_name"] = user["name"]
-            session["store_name"] = user["store_name"]
-            session["csrf_token"] = secrets.token_urlsafe(32)
 
             return redirect(url_for("dashboard"))
 
-        flash("Incorrect email or password.", "error")
+        flash("Incorrect login details.", "error")
         return redirect(url_for("login"))
 
-    return render_template("auth.html", mode="login")
-
+    return render_template("auth.html")
 
 # LOGOUT
 
