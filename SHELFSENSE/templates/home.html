@@ -1,0 +1,554 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfSense | Smarter Retail Management</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #faf8f1;
+            color: #263c2d;
+        }
+
+        a {
+            text-decoration: none;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 22px 8%;
+            background: #faf8f1;
+        }
+
+        .logo {
+            font-size: 27px;
+            font-weight: 800;
+            color: #315c3d;
+            letter-spacing: -1px;
+        }
+
+        .logo span {
+            color: #e58b49;
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 28px;
+        }
+
+        .nav-links a {
+            color: #526454;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .nav-links a:hover {
+            color: #e58b49;
+        }
+
+        .nav-button {
+            background: #315c3d;
+            color: white !important;
+            padding: 12px 22px;
+            border-radius: 30px;
+        }
+
+        .hero {
+            padding: 75px 8% 85px;
+            display: grid;
+            grid-template-columns: 1.05fr 0.95fr;
+            align-items: center;
+            gap: 55px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            color: #64834f;
+            background: #e9efdf;
+            padding: 9px 16px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 {
+            font-size: clamp(42px, 5vw, 67px);
+            line-height: 1.09;
+            letter-spacing: -2.5px;
+            color: #294c34;
+            margin-bottom: 24px;
+        }
+
+        .hero h1 span {
+            color: #df8950;
+        }
+
+        .hero p {
+            font-size: 17px;
+            line-height: 1.8;
+            color: #69766a;
+            max-width: 520px;
+            margin-bottom: 32px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .primary-button {
+            background: #315c3d;
+            color: white;
+            padding: 15px 27px;
+            border-radius: 30px;
+            font-weight: 700;
+            display: inline-block;
+            transition: 0.2s;
+        }
+
+        .primary-button:hover {
+            background: #23452d;
+            transform: translateY(-2px);
+        }
+
+        .secondary-button {
+            border: 1px solid #b9c5b2;
+            color: #315c3d;
+            padding: 15px 27px;
+            border-radius: 30px;
+            font-weight: 700;
+            display: inline-block;
+        }
+
+        .hero-image {
+            min-height: 430px;
+            border-radius: 30px;
+            background:
+                linear-gradient(180deg, transparent 55%, rgba(24, 45, 27, 0.35)),
+                url("https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1100&q=85");
+            background-size: cover;
+            background-position: center;
+            position: relative;
+            box-shadow: 0 22px 55px rgba(44, 69, 43, 0.12);
+        }
+
+        .image-note {
+            position: absolute;
+            bottom: 24px;
+            left: 24px;
+            background: #fffdf6;
+            padding: 17px 22px;
+            border-radius: 15px;
+            color: #315c3d;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .image-note small {
+            display: block;
+            color: #82917d;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        .intro {
+            text-align: center;
+            padding: 75px 8%;
+            background: #eef1e6;
+        }
+
+        .section-label {
+            color: #d68149;
+            font-weight: 800;
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            margin-bottom: 15px;
+        }
+
+        .intro h2 {
+            font-size: 36px;
+            color: #294c34;
+            margin-bottom: 18px;
+        }
+
+        .intro > p {
+            max-width: 720px;
+            margin: auto;
+            color: #687669;
+            line-height: 1.8;
+        }
+
+        .features {
+            padding: 80px 8%;
+        }
+
+        .features-heading {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .features-heading h2 {
+            font-size: 36px;
+            color: #294c34;
+            margin-bottom: 12px;
+        }
+
+        .features-heading p {
+            color: #788477;
+            line-height: 1.7;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 22px;
+        }
+
+        .feature-card {
+            background: white;
+            border: 1px solid #e9e9dc;
+            border-radius: 20px;
+            padding: 30px;
+            transition: 0.25s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(40, 70, 43, 0.08);
+        }
+
+        .feature-number {
+            color: #df8950;
+            font-size: 13px;
+            font-weight: 800;
+            margin-bottom: 20px;
+        }
+
+        .feature-card h3 {
+            color: #315c3d;
+            font-size: 19px;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: #788477;
+            line-height: 1.7;
+            font-size: 14px;
+        }
+
+        .impact {
+            margin: 20px 8% 80px;
+            padding: 65px;
+            border-radius: 28px;
+            background: #315c3d;
+            color: white;
+            text-align: center;
+        }
+
+        .impact h2 {
+            font-size: 36px;
+            margin-bottom: 18px;
+        }
+
+        .impact p {
+            max-width: 700px;
+            margin: auto;
+            line-height: 1.8;
+            color: #e0eadf;
+        }
+
+        .impact strong {
+            color: #f4bd8d;
+        }
+
+        .cta {
+            text-align: center;
+            padding: 65px 8% 80px;
+        }
+
+        .cta h2 {
+            color: #294c34;
+            font-size: 36px;
+            margin-bottom: 15px;
+        }
+
+        .cta p {
+            color: #788477;
+            margin-bottom: 28px;
+            line-height: 1.7;
+        }
+
+        footer {
+            background: #243e2c;
+            color: #dce7d9;
+            padding: 30px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            font-size: 13px;
+        }
+
+        footer .logo {
+            color: white;
+        }
+
+        @media (max-width: 850px) {
+            .hero {
+                grid-template-columns: 1fr;
+                padding-top: 45px;
+            }
+
+            .hero-image {
+                min-height: 330px;
+            }
+
+            .feature-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .nav-links {
+                gap: 14px;
+            }
+        }
+
+        @media (max-width: 560px) {
+            nav {
+                padding: 18px 5%;
+                flex-wrap: wrap;
+                gap: 15px;
+            }
+
+            .nav-links {
+                gap: 12px;
+                flex-wrap: wrap;
+            }
+
+            .nav-links a {
+                font-size: 12px;
+            }
+
+            .hero {
+                padding: 45px 6%;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .intro h2,
+            .features-heading h2,
+            .impact h2,
+            .cta h2 {
+                font-size: 29px;
+            }
+
+            .impact {
+                margin: 10px 5% 55px;
+                padding: 40px 25px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <nav>
+        <div class="logo">Shelf<span>Sense.</span></div>
+
+        <div class="nav-links">
+            <a href="#features">Features</a>
+            <a href="#about">About</a>
+            <a href="/login">Login</a>
+            <a href="/register" class="nav-button">Get Started</a>
+        </div>
+    </nav>
+
+    <section class="hero">
+
+        <div>
+            <div class="eyebrow">SMARTER INVENTORY. BETTER BUSINESS.</div>
+
+            <h1>
+                Know your stock.
+                <span>Control your losses.</span>
+                Make smarter decisions.
+            </h1>
+
+            <p>
+                A smarter way for small-scale retailers to manage
+                inventory, monitor expiry dates, track sales and
+                stay in control of their business.
+            </p>
+
+            <div class="hero-buttons">
+                <a href="/register" class="primary-button">
+                    Get Started
+                </a>
+
+                <a href="#features" class="secondary-button">
+                    Explore Features
+                </a>
+            </div>
+        </div>
+
+        <div class="hero-image">
+            <div class="image-note">
+                Better visibility. Less waste.
+                <small>Built with small retailers in mind.</small>
+            </div>
+        </div>
+
+    </section>
+
+    <section class="intro" id="about">
+
+        <div class="section-label">WHY SHELFSENSE?</div>
+
+        <h2>Every product counts.</h2>
+
+        <p>
+            For a small retailer, every product represents an
+            investment. Unnoticed expiry dates, missing stock and
+            poor inventory records can lead to avoidable losses.
+            ShelfSense brings essential inventory management tools
+            into one accessible platform, helping retailers make
+            informed decisions and manage their shops with greater
+            confidence.
+        </p>
+
+    </section>
+
+    <section class="features" id="features">
+
+        <div class="features-heading">
+            <div class="section-label">WHAT WE OFFER</div>
+
+            <h2>Everything in one place.</h2>
+
+            <p>
+                Practical tools designed to make everyday retail
+                management easier.
+            </p>
+        </div>
+
+        <div class="feature-grid">
+
+            <div class="feature-card">
+                <div class="feature-number">01 / INVENTORY</div>
+                <h3>Stock Management</h3>
+                <p>
+                    Maintain organised product records and keep
+                    track of the quantities available in your shop.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">02 / EXPIRY</div>
+                <h3>Expiry Monitoring</h3>
+                <p>
+                    Identify products approaching their expiry dates
+                    and take action before they become a loss.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">03 / SCANNING</div>
+                <h3>Barcode Scanning</h3>
+                <p>
+                    Register products and update recorded stock
+                    quantities using camera-based barcode scanning.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">04 / ALERTS</div>
+                <h3>Low Stock Alerts</h3>
+                <p>
+                    Know when products reach their minimum stock
+                    levels and identify what needs restocking.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">05 / LOSS CONTROL</div>
+                <h3>Inventory Accountability</h3>
+                <p>
+                    Compare recorded quantities with physical stock
+                    to help identify discrepancies and investigate
+                    potential losses.
+                </p>
+            </div>
+
+            <div class="feature-card">
+                <div class="feature-number">06 / SALES</div>
+                <h3>Sales Records</h3>
+                <p>
+                    Record transactions and review sales history
+                    to understand your shop's activity.
+                </p>
+            </div>
+
+        </div>
+
+    </section>
+
+    <section class="impact">
+
+        <div class="section-label">OUR PURPOSE</div>
+
+        <h2>Technology should work for every retailer.</h2>
+
+        <p>
+            We believe small businesses deserve access to the
+            advantages of digital retail management too.
+            ShelfSense aims to put <strong>visibility,
+            accountability and control</strong> directly into
+            the hands of individual shop owners.
+        </p>
+
+    </section>
+
+    <section class="cta">
+
+        <h2>Take control of your inventory.</h2>
+
+        <p>
+            Make every product count. Make every decision smarter.
+        </p>
+
+        <a href="/register" class="primary-button">
+            Start with ShelfSense
+        </a>
+
+    </section>
+
+    <footer>
+
+        <div class="logo">Shelf<span>Sense.</span></div>
+
+        <p>Know your stock. Control your losses. Make smarter decisions.</p>
+
+        <p>© 2026 ShelfSense. All rights reserved.</p>
+
+    </footer>
+
+</body>
+</html>
