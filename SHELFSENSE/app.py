@@ -258,6 +258,7 @@ def register():
         return render_template("auth.html", mode="register")
 
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
     if request.method == "POST":
@@ -280,13 +281,19 @@ def login():
         if user and check_password_hash(user["password_hash"], password):
             session["user_id"] = user["id"]
             session["store_id"] = user["store_id"]
+            session["user_name"] = user["name"]
+            session["store_name"] = db.execute(
+                "SELECT name FROM stores WHERE id = ?",
+                (user["store_id"],)
+            ).fetchone()["name"]
 
             return redirect(url_for("dashboard"))
 
         flash("Incorrect login details.", "error")
         return redirect(url_for("login"))
 
-   return render_template("auth.html", mode="login")
+    return render_template("auth.html", mode="login")
+
 
 # LOGOUT
 
