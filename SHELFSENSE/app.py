@@ -206,6 +206,8 @@ def home():
 
 # REGISTER
 
+# REGISTER
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     if request.method == "POST":
@@ -227,7 +229,8 @@ def register():
         db = get_db()
 
         existing = db.execute(
-            "SELECT id FROM users WHERE email = ?", (identifier,)
+            "SELECT id FROM users WHERE email = ?",
+            (identifier,)
         ).fetchone()
 
         if existing:
@@ -255,8 +258,7 @@ def register():
         flash("Account created successfully. Please log in.", "success")
         return redirect(url_for("login"))
 
-        return render_template("auth.html", mode="register")
-
+    return render_template("auth.html", mode="register")
 
 
 @app.route("/login", methods=["GET", "POST"])
