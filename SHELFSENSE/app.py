@@ -630,6 +630,13 @@ def sales():
 
     return render_template("sales.html", sales=rows)
 
+
+# USER GUIDE
+@app.route("/guide")
+@login_required
+def guide():
+    return render_template("guide.html")
+
 init_db()
 
 if __name__ == "__main__":
