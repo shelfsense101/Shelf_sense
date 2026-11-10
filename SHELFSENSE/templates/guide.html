@@ -1,0 +1,36 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ShelfSense | User Guide</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <main class="page-content">
+        <h1>ShelfSense User Guide</h1>
+        <p>Everything you need to manage your shop inventory.</p>
+
+        <h2>1. Create an account</h2>
+        <p>Register using your name, shop name, phone number or email, and password.</p>
+
+        <h2>2. Add products</h2>
+        <p>Enter the product name, brand, category, quantity, purchase date and expiry date.</p>
+
+        <h2>3. Scan barcodes</h2>
+        <p>Use Quick Scan to identify products and update stock when an item is scanned.</p>
+
+        <h2>4. Monitor expiry dates</h2>
+        <p>Check the expiry section to identify products that are approaching their expiry dates or have expired.</p>
+
+        <h2>5. Manage low stock</h2>
+        <p>Set a minimum stock threshold to receive alerts when quantities become low.</p>
+
+        <h2>6. Record sales</h2>
+        <p>Record product sales and view your sales history and revenue.</p>
+
+        <a href="{{ url_for('dashboard') }}">Back to Dashboard</a>
+    </main>
+</body>
+</html>
