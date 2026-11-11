@@ -20,17 +20,17 @@
         <span class="brand-mark">S</span>
         <span>
             <strong>ShelfSense</strong>
-            <small>STORE WORKSPACE</small>
+            <small>{{ t('store_workspace') }}</small>
         </span>
     </a>
 
-    <div class="side-label">WORKSPACE</div>
-    
-<a class="side-link active" href="{{ url_for('dashboard') }}">▦ Overview</a>
-<a class="side-link" href="#inventory">▤ Inventory</a>
-<a class="side-link" href="#expiry">◷ Expiry & Offers</a>
-<a class="side-link" href="{{ url_for('sales') }}">↗ Sales History</a>
-<a class="side-link" href="{{ url_for('guide') }}">▣ User Guide</a>
+    <div class="side-label">{{ t('workspace') }}</div>
+
+    <a class="side-link active" href="{{ url_for('dashboard') }}">▦ {{ t('overview') }}</a>
+    <a class="side-link" href="#inventory">▤ {{ t('inventory') }}</a>
+    <a class="side-link" href="#expiry">◷ {{ t('expiry_offers') }}</a>
+    <a class="side-link" href="{{ url_for('sales') }}">↗ {{ t('sales_history') }}</a>
+    <a class="side-link" href="{{ url_for('guide') }}">▣ {{ t('user_guide') }}</a>
 
     <div class="sidebar-bottom">
 
@@ -44,7 +44,7 @@
 
         <form method="POST" action="{{ url_for('logout') }}">
             <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
-            <button class="logout-btn">↪ Sign out</button>
+            <button class="logout-btn">↪ {{ t('sign_out') }}</button>
         </form>
 
     </div>
@@ -55,42 +55,51 @@
 <main class="main">
 
     <header class="topbar">
+
         {% include "_language_selector.html" %}
+
         <div>
-            <p class="crumb">Workspace / Overview</p>
-            <h1>Welcome, {{ session.get('user_name') }}.</h1>
+            <p class="crumb">{{ t('workspace') }} / {{ t('overview') }}</p>
+            <h1>{{ t('welcome') }}, {{ session.get('user_name') }}.</h1>
+
             <!-- BARCODE SCANNER -->
-<section class="scanner-card">
-    <div class="scanner-heading">
-        <div>
-            <h2>Quick Scan</h2>
-            <p>Scan a product barcode to automatically update inventory.</p>
+            <section class="scanner-card">
+                <div class="scanner-heading">
+                    <div>
+                        <h2>{{ t('quick_scan') }}</h2>
+                        <p>{{ t('scan_description') }}</p>
+                    </div>
+                    <span class="scanner-status">{{ t('ready') }}</span>
+                </div>
+
+                <div id="scanner-reader"></div>
+
+                <div class="scanner-actions">
+                    <button type="button" id="startScanner">
+                        {{ t('start_scanner') }}
+                    </button>
+
+                    <button type="button" id="stopScanner">
+                        {{ t('stop_scanner') }}
+                    </button>
+                </div>
+
+                <div id="scanMessage" role="status">
+                    {{ t('scanner_ready') }}
+                </div>
+            </section>
+
+            <script src="https://unpkg.com/html5-qrcode"></script>
+
+            <p class="muted">
+                {{ t('store_overview') }} {{ store_name }}.
+            </p>
         </div>
-        <span class="scanner-status">READY</span>
-    </div>
 
-    <div id="scanner-reader"></div>
-
-    <div class="scanner-actions">
-        <button type="button" id="startScanner">
-            Start Camera Scanner
+        <button class="btn primary" data-open-modal>
+            + {{ t('add_product') }}
         </button>
 
-        <button type="button" id="stopScanner">
-            Stop Scanner
-        </button>
-    </div>
-
-    <div id="scanMessage" role="status">
-        Camera scanner is ready.
-    </div>
-</section>
-
-<script src="https://unpkg.com/html5-qrcode"></script>
-            <p class="muted">Here's what's happening at {{ store_name }}.</p>
-        </div>
-
-        <button class="btn primary" data-open-modal>+ Add product</button>
     </header>
 
 
@@ -101,77 +110,82 @@
     {% endwith %}
 
 
+    <!-- STATISTICS -->
+
     <section class="stats-grid">
 
         <article class="stat-card">
-            <span class="stat-label">Products listed</span>
+            <span class="stat-label">{{ t('products_listed') }}</span>
             <strong>{{ metrics.product_count }}</strong>
-            <small>Different product entries</small>
+            <small>{{ t('different_products') }}</small>
         </article>
 
         <article class="stat-card">
-            <span class="stat-label">Units in stock</span>
+            <span class="stat-label">{{ t('units_stock') }}</span>
             <strong>{{ metrics.units }}</strong>
-            <small>Across your inventory</small>
+            <small>{{ t('across_inventory') }}</small>
         </article>
 
         <article class="stat-card accent-warn">
-            <span class="stat-label">Expiring in 7 days</span>
+            <span class="stat-label">{{ t('expiring_7_days') }}</span>
             <strong>{{ metrics.soon }}</strong>
-            <small>Review suggested offers</small>
+            <small>{{ t('review_offers') }}</small>
         </article>
 
         <article class="stat-card accent-danger">
-            <span class="stat-label">Expired entries</span>
+            <span class="stat-label">{{ t('expired_entries') }}</span>
             <strong>{{ metrics.expired }}</strong>
-            <small>Require attention</small>
+            <small>{{ t('require_attention') }}</small>
         </article>
 
     </section>
 
 
+    <!-- FINANCIAL INFORMATION -->
+
     <section class="financial-grid">
 
         <article class="finance-card">
-            <span>Current stock cost value</span>
+            <span>{{ t('stock_cost') }}</span>
             <strong>₹{{ "%.2f"|format(metrics.stock_cost) }}</strong>
-            <small>Remaining quantity × purchase cost</small>
+            <small>{{ t('stock_cost_description') }}</small>
         </article>
 
         <article class="finance-card">
-            <span>Recorded sales revenue</span>
+            <span>{{ t('sales_revenue') }}</span>
             <strong>₹{{ "%.2f"|format(metrics.revenue) }}</strong>
-            <small>{{ metrics.transactions }} transactions</small>
+            <small>{{ metrics.transactions }} {{ t('transactions') }}</small>
         </article>
 
         <article class="finance-card">
-            <span>Estimated value recovered</span>
+            <span>{{ t('recovered_value') }}</span>
             <strong>₹{{ "%.2f"|format(metrics.recovered) }}</strong>
-            <small>Cost value of recorded sales before expiry</small>
+            <small>{{ t('recovered_description') }}</small>
         </article>
 
         <article class="finance-card">
-            <span>Expired stock cost value</span>
+            <span>{{ t('expired_value') }}</span>
             <strong>₹{{ "%.2f"|format(metrics.expired_loss) }}</strong>
-            <small>Current expired quantity × purchase cost</small>
+            <small>{{ t('expired_cost_description') }}</small>
         </article>
 
     </section>
 
     <p class="metric-note">
-        Estimates use the prices and quantities entered by your store.
-        Recovered value is not a guarantee of loss prevented.
+        {{ t('estimate_note') }}
     </p>
 
+
+    <!-- EXPIRY RECOMMENDATIONS -->
 
     <section class="panel" id="expiry">
 
         <div class="section-head">
             <div>
-                <p class="eyebrow">ACTION CENTRE</p>
-                <h2>Expiry & offer recommendations</h2>
+                <p class="eyebrow">{{ t('action_centre') }}</p>
+                <h2>{{ t('recommendations') }}</h2>
                 <p class="muted">
-                    Review suggested discounts before recording a sale.
+                    {{ t('review_discounts') }}
                 </p>
             </div>
         </div>
@@ -191,25 +205,25 @@
                         <div class="rec-main">
                             <b>{{ p.name }}</b>
                             <small>
-                                {{ p.brand or 'No brand' }}
-                                · {{ p.quantity }} units
-                                · Expires {{ p.expiry_date }}
+                                {{ p.brand or t('no_brand') }}
+                                · {{ p.quantity }} {{ t('units_stock') }}
+                                · {{ t('expires') }} {{ p.expiry_date }}
                             </small>
                         </div>
 
                         <div class="rec-status">
 
                             {% if p.days_left < 0 %}
-                                <span class="tag danger">Expired</span>
-                                <small>Do not sell</small>
+                                <span class="tag danger">{{ t('expired') }}</span>
+                                <small>{{ t('do_not_sell') }}</small>
 
                             {% elif p.days_left == 0 %}
-                                <span class="tag danger">Expires today</span>
-                                <small>{{ p.suggested_discount }}% suggested discount</small>
+                                <span class="tag danger">{{ t('expires_today') }}</span>
+                                <small>{{ p.suggested_discount }}% {{ t('suggested_discount') }}</small>
 
                             {% else %}
-                                <span class="tag warn">{{ p.days_left }} days left</span>
-                                <small>{{ p.suggested_discount }}% suggested discount</small>
+                                <span class="tag warn">{{ p.days_left }} {{ t('days_left') }}</span>
+                                <small>{{ p.suggested_discount }}% {{ t('suggested_discount') }}</small>
                             {% endif %}
 
                         </div>
@@ -224,14 +238,16 @@
 
                                 <input type="number" name="quantity"
                                        min="1" max="{{ p.quantity }}"
-                                       value="1" aria-label="Quantity">
+                                       value="1" aria-label="{{ t('quantity') }}">
 
                                 <input type="number" name="discount"
                                        min="0" max="90"
                                        value="{{ p.suggested_discount }}"
-                                       aria-label="Discount percentage">
+                                       aria-label="{{ t('discount') }}">
 
-                                <button class="btn primary small">Record sale</button>
+                                <button class="btn primary small">
+                                    {{ t('record_sale') }}
+                                </button>
 
                             </form>
 
@@ -246,8 +262,8 @@
         {% else %}
 
             <div class="empty-state">
-                <b>You're all clear.</b>
-                <span>No products are expiring within 30 days.</span>
+                <b>{{ t('all_clear') }}</b>
+                <span>{{ t('no_expiring') }}</span>
             </div>
 
         {% endif %}
@@ -255,29 +271,37 @@
     </section>
 
 
+    <!-- INVENTORY -->
+
     <section class="panel" id="inventory">
 
         <div class="section-head">
             <div>
-                <p class="eyebrow">STOCK MANAGEMENT</p>
-                <h2>Your inventory</h2>
-                <p class="muted">Manage your store's products and quantities.</p>
+                <p class="eyebrow">{{ t('stock_management') }}</p>
+                <h2>{{ t('your_inventory') }}</h2>
+                <p class="muted">{{ t('manage_products') }}</p>
             </div>
 
-            <button class="btn secondary" data-open-modal>+ Add product</button>
+            <button class="btn secondary" data-open-modal>
+                + {{ t('add_product') }}
+            </button>
         </div>
 
         <div class="table-tools">
-            <input id="searchInput" type="search" placeholder="Search products...">
+
+            <input id="searchInput"
+                   type="search"
+                   placeholder="{{ t('search_products') }}">
 
             <select id="statusFilter">
-                <option value="all">All statuses</option>
-                <option value="Fresh">Fresh</option>
-                <option value="Watch">Watch</option>
-                <option value="Expiring soon">Expiring soon</option>
-                <option value="Urgent">Urgent</option>
-                <option value="Expired">Expired</option>
+                <option value="all">{{ t('all_statuses') }}</option>
+                <option value="Fresh">{{ t('fresh') }}</option>
+                <option value="Watch">{{ t('watch') }}</option>
+                <option value="Expiring soon">{{ t('expiring_soon') }}</option>
+                <option value="Urgent">{{ t('urgent') }}</option>
+                <option value="Expired">{{ t('expired') }}</option>
             </select>
+
         </div>
 
         <div class="table-wrap">
@@ -286,13 +310,13 @@
 
                 <thead>
                     <tr>
-                        <th>PRODUCT</th>
-                        <th>QUANTITY</th>
-                        <th>BUY COST</th>
-                        <th>SELL PRICE</th>
-                        <th>EXPIRY</th>
-                        <th>STATUS</th>
-                        <th>ACTION</th>
+                        <th>{{ t('product') }}</th>
+                        <th>{{ t('quantity') }}</th>
+                        <th>{{ t('buy_cost') }}</th>
+                        <th>{{ t('sell_price') }}</th>
+                        <th>{{ t('expiry') }}</th>
+                        <th>{{ t('status') }}</th>
+                        <th>{{ t('action') }}</th>
                     </tr>
                 </thead>
 
@@ -320,26 +344,28 @@
 
                             <td>
                                 {% if p.days_left < 0 %}
-                                    <span class="tag danger">Expired</span>
+                                    <span class="tag danger">{{ t('expired') }}</span>
                                 {% elif p.days_left <= 3 %}
-                                    <span class="tag danger">Urgent</span>
+                                    <span class="tag danger">{{ t('urgent') }}</span>
                                 {% elif p.days_left <= 7 %}
-                                    <span class="tag warn">Expiring soon</span>
+                                    <span class="tag warn">{{ t('expiring_soon') }}</span>
                                 {% elif p.days_left <= 30 %}
-                                    <span class="tag neutral">Watch</span>
+                                    <span class="tag neutral">{{ t('watch') }}</span>
                                 {% else %}
-                                    <span class="tag good">Fresh</span>
+                                    <span class="tag good">{{ t('fresh') }}</span>
                                 {% endif %}
                             </td>
 
                             <td>
                                 <form method="POST"
                                       action="{{ url_for('delete_product', pid=p.id) }}"
-                                      onsubmit="return confirm('Remove this product?')">
+                                      onsubmit="return confirm('{{ t('remove_confirm') }}')">
 
                                     <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
 
-                                    <button class="text-button danger-text">Remove</button>
+                                    <button class="text-button danger-text">
+                                        {{ t('remove') }}
+                                    </button>
 
                                 </form>
                             </td>
@@ -350,7 +376,7 @@
 
                         <tr>
                             <td colspan="7" class="empty-cell">
-                                No products yet. Add your first product!
+                                {{ t('no_products') }}
                             </td>
                         </tr>
 
@@ -364,8 +390,9 @@
 
     </section>
 
+
     <footer class="footer">
-        ShelfSense · Smarter inventory, less waste.
+        ShelfSense · {{ t('footer_tagline') }}
     </footer>
 
 </main>
@@ -380,9 +407,9 @@
 
         <div class="modal-head">
             <div>
-                <p class="eyebrow">NEW INVENTORY ENTRY</p>
-                <h2>Add a product</h2>
-                <p class="muted">Enter the product details.</p>
+                <p class="eyebrow">{{ t('new_entry') }}</p>
+                <h2>{{ t('add_product') }}</h2>
+                <p class="muted">{{ t('enter_product_details') }}</p>
             </div>
 
             <button class="modal-close" data-close-modal>×</button>
@@ -394,97 +421,102 @@
 
             <div class="form-grid">
 
-                <label>Product name *
+                <label>{{ t('product_name') }} *
                     <input name="name" required>
                 </label>
 
-                <label>Brand
+                <label>{{ t('brand') }}
                     <input name="brand">
                 </label>
 
-                <label>Category
+                <label>{{ t('category') }}
                     <select name="category">
-                        <option>Dairy</option>
-                        <option>Fruits</option>
-                        <option>Vegetables</option>
-                        <option>Bakery</option>
-                        <option>Beverages</option>
-                        <option>Snacks</option>
-                        <option>Other</option>
+                        <option>{{ t('dairy') }}</option>
+                        <option>{{ t('fruits') }}</option>
+                        <option>{{ t('vegetables') }}</option>
+                        <option>{{ t('bakery') }}</option>
+                        <option>{{ t('beverages') }}</option>
+                        <option>{{ t('snacks') }}</option>
+                        <option>{{ t('other') }}</option>
                     </select>
                 </label>
-                
-                <label>Quantity *
-    <input type="number" name="quantity" min="1" required>
-</label>
 
-<div class="form-group">
-    <label for="barcode">Product Barcode</label>
+                <label>{{ t('quantity') }} *
+                    <input type="number" name="quantity" min="1" required>
+                </label>
 
-    <input
-        type="text"
-        id="barcode"
-        name="barcode"
-        placeholder="Scan or enter barcode number"
-    >
+                <div class="form-group">
+                    <label for="barcode">{{ t('barcode') }}</label>
 
-    <button type="button" id="startProductBarcodeScanner">
-        Scan Barcode
-    </button>
+                    <input
+                        type="text"
+                        id="barcode"
+                        name="barcode"
+                        placeholder="{{ t('barcode_hint') }}"
+                    >
 
-    <button
-        type="button"
-        id="stopProductBarcodeScanner"
-        style="display: none;"
-    >
-        Stop Camera
-    </button>
+                    <button type="button" id="startProductBarcodeScanner">
+                        {{ t('scan_barcode') }}
+                    </button>
 
-    <div id="product-barcode-reader"></div>
+                    <button
+                        type="button"
+                        id="stopProductBarcodeScanner"
+                        style="display: none;"
+                    >
+                        {{ t('stop_camera') }}
+                    </button>
 
-    <small id="productBarcodeMessage">
-        Scan a product barcode to fill this field automatically.
-    </small>
-</div>
+                    <div id="product-barcode-reader"></div>
 
-<div class="form-group">
-    <label for="low_stock_threshold">Minimum Stock Alert</label>
-    <input
-        type="number"
-        id="low_stock_threshold"
-        name="low_stock_threshold"
-        value="5"
-        min="0"
-        required
-    >
-    <small>Alert when stock reaches this quantity.</small>
-</div>
+                    <small id="productBarcodeMessage">
+                        {{ t('barcode_scan_hint') }}
+                    </small>
+                </div>
 
-                <label>Purchase cost per unit (₹) *
+                <div class="form-group">
+                    <label for="low_stock_threshold">{{ t('minimum_stock') }}</label>
+                    <input
+                        type="number"
+                        id="low_stock_threshold"
+                        name="low_stock_threshold"
+                        value="5"
+                        min="0"
+                        required
+                    >
+                    <small>{{ t('minimum_stock_hint') }}</small>
+                </div>
+
+                <label>{{ t('purchase_cost') }} (₹) *
                     <input type="number" name="cost_price" min="0" step="0.01" required>
                 </label>
 
-                <label>Selling price per unit (₹) *
+                <label>{{ t('selling_price') }} (₹) *
                     <input type="number" name="selling_price" min="0" step="0.01" required>
                 </label>
 
-                <label>Stocked on *
+                <label>{{ t('stocked_on') }} *
                     <input type="date" name="stocked_on" required>
                 </label>
 
-                <label>Expiry date *
+                <label>{{ t('expiry_date') }} *
                     <input type="date" name="expiry_date" required>
                 </label>
 
-                <label class="wide">Notes
+                <label class="wide">{{ t('notes') }}
                     <textarea name="notes" rows="2"></textarea>
                 </label>
 
             </div>
 
             <div class="modal-actions">
-                <button type="button" class="btn secondary" data-close-modal>Cancel</button>
-                <button type="submit" class="btn primary">Save product</button>
+                <button type="button" class="btn secondary" data-close-modal>
+                    {{ t('cancel') }}
+                </button>
+
+                <button type="submit" class="btn primary">
+                    {{ t('save_product') }}
+                </button>
             </div>
 
         </form>
