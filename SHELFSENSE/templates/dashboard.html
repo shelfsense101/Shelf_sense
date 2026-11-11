@@ -55,6 +55,7 @@
 <main class="main">
 
     <header class="topbar">
+        {% include "_language_selector.html" %}
         <div>
             <p class="crumb">Workspace / Overview</p>
             <h1>Welcome, {{ session.get('user_name') }}.</h1>
