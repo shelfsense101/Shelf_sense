@@ -812,3 +812,34 @@ tr:last-child td {
     color: #94a3b8;
     font-size: 12px;
 }
+
+/* Language selector */
+.language-form {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px;
+    flex-wrap: wrap;
+}
+
+.language-form label {
+    font-size: 13px;
+    font-weight: 600;
+    color: inherit;
+}
+
+.language-form select {
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    background: #ffffff;
+    color: #1f2937;
+    font-size: 13px;
+    cursor: pointer;
+    outline: none;
+}
+
+.language-form select:focus {
+    border-color: #4776e6;
+    box-shadow: 0 0 0 3px rgba(71, 118, 230, 0.12);
+}
