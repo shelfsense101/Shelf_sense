@@ -5,6 +5,7 @@ import secrets
 from pathlib import Path
 from datetime import date
 from functools import wraps
+from translations import LANGUAGES, translate
 
 from flask import (
     Flask, render_template, request, redirect,
@@ -55,6 +56,7 @@ def close_db(error=None):
         db.close()
 
   
+
 
 def init_db():
     db = sqlite3.connect(DB_PATH)
@@ -140,8 +142,21 @@ def init_db():
         WHERE barcode IS NOT NULL AND barcode != ''
     """)
 
+    # Add language preference to existing users
+    user_columns = {
+        row[1] for row in
+        db.execute("PRAGMA table_info(users)").fetchall()
+    }
+
+    if "language" not in user_columns:
+        db.execute("""
+            ALTER TABLE users
+            ADD COLUMN language TEXT NOT NULL DEFAULT 'en'
+        """)
+
     db.commit()
     db.close()
+
 
 
 # SECURITY
@@ -166,6 +181,19 @@ def prepare_csrf():
 @app.context_processor
 def inject_csrf():
     return {"csrf_token": session.get("csrf_token", "")}
+
+@app.context_processor
+def inject_language_settings():
+    language = session.get("language", "en")
+
+    if language not in LANGUAGES:
+        language = "en"
+
+    return {
+        "t": lambda key: translate(key, language),
+        "current_language": language,
+        "languages": LANGUAGES
+    }
 
 
 def login_required(function):
@@ -245,13 +273,18 @@ def register():
         )
         new_store_id = cursor.lastrowid
 
-        db.execute(
-            """
-            INSERT INTO users (store_id, name, email, password_hash)
-            VALUES (?, ?, ?, ?)
-            """,
-            (new_store_id, name, identifier, password_hash)
-        )
+       db.execute(
+    """INSERT INTO users
+       (store_id, name, email, password_hash, language)
+       VALUES (?, ?, ?, ?, ?)""",
+    (
+        store_id,
+        name,
+        identifier,
+        generate_password_hash(password),
+        session.get("language", "en")
+    )
+)
 
         db.commit()
 
@@ -284,6 +317,11 @@ def login():
             session["user_id"] = user["id"]
             session["store_id"] = user["store_id"]
             session["user_name"] = user["name"]
+            session["language"] = (
+    user["language"]
+    if user["language"] in LANGUAGES
+    else "en"
+)
             session["store_name"] = db.execute(
                 "SELECT name FROM stores WHERE id = ?",
                 (user["store_id"],)
@@ -304,6 +342,27 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for("login"))
+@app.route("/set-language", methods=["POST"])
+def set_language():
+    language = request.form.get("language", "en")
+
+    if language not in LANGUAGES:
+        language = "en"
+
+    session["language"] = language
+
+    if session.get("user_id"):
+        db = get_db()
+        db.execute(
+            "UPDATE users SET language = ? WHERE id = ?",
+            (language, session["user_id"])
+        )
+        db.commit()
+
+    if session.get("user_id"):
+        return redirect(url_for("dashboard"))
+
+    return redirect(url_for("home"))
 
 
 # DASHBOARD
